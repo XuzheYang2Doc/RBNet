@@ -19,8 +19,8 @@ from mmdet.utils import setup_cache_size_limit_of_dynamo
 def parse_args():
     parser = argparse.ArgumentParser(
         description='MMDet test (and eval) a model')
-    parser.add_argument('--config', default="/data/code2025/Q2/2025-08-26-01/work_dirs/mask2former_all/mask2former_all.py", help='test config file path')
-    parser.add_argument('--checkpoint', default="/data/code2025/Q2/2025-08-26-01/work_dirs/mask2former_all/iter_26000.pth", help='checkpoint file')
+    parser.add_argument('--config', default=r"E:\BaiduNetdiskDownload\2025-11-17-01\work_dirs\mask2former\mask2former.py", help='test config file path')
+    parser.add_argument('--checkpoint', default=r"E:\BaiduNetdiskDownload\2025-11-17-01\work_dirs\mask2former\iter_5000.pth", help='checkpoint file')
     parser.add_argument(
         '--work-dir',
         help='the directory to save the file containing evaluation metrics')

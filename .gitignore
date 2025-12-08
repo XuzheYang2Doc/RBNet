@@ -2,6 +2,10 @@
 *.png
 *.pth
 *.pyc
-*/work_dirs
-*/data
-*/datasets
+work_dirs/
+data/
+datasets/
+**/mmdet.egg-info/
+**/mmsegmentation.egg-info/
+__pycache__/
+

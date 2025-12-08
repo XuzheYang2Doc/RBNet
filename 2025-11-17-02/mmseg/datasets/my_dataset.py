@@ -27,7 +27,7 @@ class MyDataset(CustomDataset):
                 [1, 1, 1]]
 
     def __init__(self,
-                 img_suffix='.png',
+                 img_suffix='.jpg',
                  seg_map_suffix='.png',
                  **kwargs):
         super(MyDataset, self).__init__(

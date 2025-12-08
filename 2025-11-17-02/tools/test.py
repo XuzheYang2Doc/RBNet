@@ -23,10 +23,10 @@ from mmseg.utils import build_ddp, build_dp, get_device, setup_multi_processes
 def parse_args():
     parser = argparse.ArgumentParser(
         description='mmseg test (and eval) a model')
-    parser.add_argument('--work_dirs', default='../work_dirs/', help='test config file path')
-    parser.add_argument('--data_root', default='/data/code2025/Q2/2025-07-27-01/datasets/Vaihingen/images', help='test config file path')
-    parser.add_argument('--config', default='upernet', help='test config file path')
-    parser.add_argument('--checkpoint', default='iter_50000.pth', help='checkpoint file')
+    parser.add_argument('--work_dirs', default=r'E:\BaiduNetdiskDownload\2025-11-17-02\work_dirs', help='test config file path')
+    parser.add_argument('--data_root', default=r'E:\BaiduNetdiskDownload\2025-11-17-02\datasets\true_test', help='test config file path')
+    parser.add_argument('--config', default=r'E:\BaiduNetdiskDownload\2025-11-17-02\work_dirs\upernet\upernet', help='test config file path')
+    parser.add_argument('--checkpoint', default=r'E:\BaiduNetdiskDownload\2025-11-17-02\work_dirs\upernet\iter_10000.pth', help='checkpoint file')
     parser.add_argument(
         '--work-dir',
         help=('if specified, the evaluation metric results will be dumped'
@@ -195,6 +195,7 @@ def main():
     cfg.data.test.data_root = args.data_root
     cfg.data.test.img_dir = args.data_root
     cfg.data.test.ann_dir = args.data_root.replace('images', 'labels')
+    print(cfg.data.test.img_dir)
     dataset = build_dataset(cfg.data.test)
     # The default loader config
     loader_cfg = dict(

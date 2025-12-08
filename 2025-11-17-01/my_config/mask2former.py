@@ -1,7 +1,7 @@
 # Mask2Former 单文件配置（精简版，保持可运行）
 # 数据集参数
 dataset_type = 'CocoDataset'
-data_root = 'data/coco/'
+data_root = '../data/coco/'
 num_things_classes = 1
 num_stuff_classes = 0
 num_classes = num_things_classes + num_stuff_classes
