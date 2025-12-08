@@ -8,4 +8,6 @@ datasets/
 **/mmdet.egg-info/
 **/mmsegmentation.egg-info/
 __pycache__/
-
+.idea/
+.vscode/
+.DS_Store
