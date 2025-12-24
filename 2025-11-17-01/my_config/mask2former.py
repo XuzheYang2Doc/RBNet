@@ -1,7 +1,7 @@
 # Mask2Former 单文件配置（精简版，保持可运行）
 # 数据集参数
 dataset_type = 'CocoDataset'
-data_root = '../data/coco/'
+data_root = './data/coco/'
 num_things_classes = 1
 num_stuff_classes = 0
 num_classes = num_things_classes + num_stuff_classes
@@ -70,7 +70,19 @@ val_dataloader = dict(
         test_mode=True,
         pipeline=test_pipeline))
 
-test_dataloader = val_dataloader
+test_dataloader = dict(
+    batch_size=1,
+    num_workers=2,
+    persistent_workers=True,
+    drop_last=False,
+    sampler=dict(type='DefaultSampler', shuffle=False),
+    dataset=dict(
+        type=dataset_type,
+        data_root=data_root,
+        ann_file='annotations/instances_test2017_no_lesion.json',
+        data_prefix=dict(img='test2017/', seg='annotations/panoptic_test2017/'),
+        test_mode=True,
+        pipeline=test_pipeline))
 
 # evaluator
 val_evaluator = dict(
@@ -79,7 +91,11 @@ val_evaluator = dict(
     metric=['bbox', 'segm'],
     classwise=True)
 
-test_evaluator = val_evaluator
+test_evaluator = dict(
+    type='CocoMetric',
+    ann_file=data_root + 'annotations/instances_test2017_no_lesion.json',
+    metric=['bbox', 'segm'],
+    classwise=True)
 
 # 模型
 batch_augments = [

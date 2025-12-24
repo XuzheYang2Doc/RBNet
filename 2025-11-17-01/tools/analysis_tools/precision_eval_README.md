@@ -1,0 +1,1 @@
+python tools/analysis_tools/precision_eval.py --config work_dirs/mask2former/mask2former.py --checkpoint work_dirs/mask2former/iter_5000.pth --precisions fp32,fp16 --repeat-num 1 --max-iter 10 --num-warmup 1 --log-interval 5 --do-speed --do-accuracy

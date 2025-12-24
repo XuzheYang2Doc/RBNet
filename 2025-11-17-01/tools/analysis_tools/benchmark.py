@@ -1,6 +1,12 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import argparse
 import os
+import sys
+
+# Ensure we use the mmdet in this repo instead of a site-packages install.
+REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+if REPO_ROOT not in sys.path:
+    sys.path.insert(0, REPO_ROOT)
 
 from mmengine import MMLogger
 from mmengine.config import Config, DictAction
@@ -14,20 +20,24 @@ from mmdet.utils.benchmark import (DataLoaderBenchmark, DatasetBenchmark,
 
 def parse_args():
     parser = argparse.ArgumentParser(description='MMDet benchmark')
-    parser.add_argument('config', help='test config file path')
-    parser.add_argument('--checkpoint', help='checkpoint file')
+    parser.add_argument('--config', 
+                        default="work_dirs/mask2former/mask2former.py",
+                        help='test config file path')
+    parser.add_argument('--checkpoint', 
+                        default="work_dirs/mask2former/iter_5000.pth",
+                        help='checkpoint file')
     parser.add_argument(
         '--task',
         choices=['inference', 'dataloader', 'dataset'],
-        default='dataloader',
+        default='inference',
         help='Which task do you want to go to benchmark')
     parser.add_argument(
         '--repeat-num',
         type=int,
-        default=1,
+        default=10,
         help='number of repeat times of measurement for averaging the results')
     parser.add_argument(
-        '--max-iter', type=int, default=2000, help='num of max iter')
+        '--max-iter', type=int, default=10, help='num of max iter')
     parser.add_argument(
         '--log-interval', type=int, default=50, help='interval of logging')
     parser.add_argument(
@@ -40,7 +50,7 @@ def parse_args():
     parser.add_argument(
         '--dataset-type',
         choices=['train', 'val', 'test'],
-        default='test',
+        default='train',
         help='Benchmark dataset type. only supports train, val and test')
     parser.add_argument(
         '--work-dir',

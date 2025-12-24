@@ -210,6 +210,8 @@ class InferenceBenchmark(BaseBenchmark):
         pure_inf_time = 0
         fps = 0
 
+        measured_iters = 0
+
         for i, data in enumerate(self.data_loader):
 
             if (i + 1) % self.log_interval == 0:
@@ -226,8 +228,10 @@ class InferenceBenchmark(BaseBenchmark):
 
             if i >= self.num_warmup:
                 pure_inf_time += elapsed
+                measured_iters += 1
                 if (i + 1) % self.log_interval == 0:
-                    fps = (i + 1 - self.num_warmup) / pure_inf_time
+                    fps = ((i + 1 - self.num_warmup) / pure_inf_time
+                           if pure_inf_time > 0 else 0)
                     cuda_memory = get_max_cuda_memory()
 
                     print_log(
@@ -238,8 +242,14 @@ class InferenceBenchmark(BaseBenchmark):
                     print_process_memory(self._process, self.logger)
 
             if (i + 1) == self.max_iter:
-                fps = (i + 1 - self.num_warmup) / pure_inf_time
+                fps = ((i + 1 - self.num_warmup) / pure_inf_time
+                       if pure_inf_time > 0 else 0)
                 break
+
+        # If the dataloader is exhausted before reaching `log_interval` or
+        # `max_iter`, compute a final fps to avoid always returning 0.
+        if fps <= 0 and measured_iters > 0 and pure_inf_time > 0:
+            fps = measured_iters / pure_inf_time
 
         return {'fps': fps}
 
@@ -253,7 +263,8 @@ class InferenceBenchmark(BaseBenchmark):
 
         if len(fps_list_) > 1:
             times_pre_image_list_ = [
-                round(1000 / result['fps'], 1) for result in results
+                (round(1000 / result['fps'], 1) if result['fps'] > 0 else float('inf'))
+                for result in results
             ]
             avg_times_pre_image_ = sum(times_pre_image_list_) / len(
                 times_pre_image_list_)
@@ -264,10 +275,16 @@ class InferenceBenchmark(BaseBenchmark):
                 f'{times_pre_image_list_}[{avg_times_pre_image_:.1f}] '
                 'ms/img', self.logger)
         else:
-            print_log(
-                f'Overall fps: {fps_list_[0]:.1f} img/s, '
-                f'times per image: {1000 / fps_list_[0]:.1f} ms/img',
-                self.logger)
+            if fps_list_[0] <= 0:
+                print_log(
+                    'Overall fps: 0.0 img/s (no measured iterations; '
+                    'try reducing --num-warmup or increasing --max-iter)',
+                    self.logger)
+            else:
+                print_log(
+                    f'Overall fps: {fps_list_[0]:.1f} img/s, '
+                    f'times per image: {1000 / fps_list_[0]:.1f} ms/img',
+                    self.logger)
 
         print_log(f'cuda memory: {get_max_cuda_memory()} MB', self.logger)
         print_process_memory(self._process, self.logger)
@@ -341,6 +358,8 @@ class DataLoaderBenchmark(BaseBenchmark):
         pure_inf_time = 0
         fps = 0
 
+        measured_iters = 0
+
         # benchmark with 2000 image and take the average
         start_time = time.perf_counter()
         for i, data in enumerate(self.data_loader):
@@ -351,8 +370,10 @@ class DataLoaderBenchmark(BaseBenchmark):
 
             if i >= self.num_warmup:
                 pure_inf_time += elapsed
+                measured_iters += 1
                 if (i + 1) % self.log_interval == 0:
-                    fps = (i + 1 - self.num_warmup) / pure_inf_time
+                    fps = ((i + 1 - self.num_warmup) / pure_inf_time
+                           if pure_inf_time > 0 else 0)
 
                     print_log(
                         f'Done batch [{i + 1:<3}/{self.max_iter}], '
@@ -363,10 +384,14 @@ class DataLoaderBenchmark(BaseBenchmark):
                     print_process_memory(self._process, self.logger)
 
             if (i + 1) == self.max_iter:
-                fps = (i + 1 - self.num_warmup) / pure_inf_time
+                fps = ((i + 1 - self.num_warmup) / pure_inf_time
+                       if pure_inf_time > 0 else 0)
                 break
 
             start_time = time.perf_counter()
+
+        if fps <= 0 and measured_iters > 0 and pure_inf_time > 0:
+            fps = measured_iters / pure_inf_time
 
         return {'fps': fps}
 
@@ -380,7 +405,8 @@ class DataLoaderBenchmark(BaseBenchmark):
 
         if len(fps_list_) > 1:
             times_pre_image_list_ = [
-                round(1000 / result['fps'], 1) for result in results
+                (round(1000 / result['fps'], 1) if result['fps'] > 0 else float('inf'))
+                for result in results
             ]
             avg_times_pre_image_ = sum(times_pre_image_list_) / len(
                 times_pre_image_list_)
@@ -392,11 +418,17 @@ class DataLoaderBenchmark(BaseBenchmark):
                 f'ms/batch, batch size: {self.batch_size}, num_workers: '
                 f'{self.num_workers}', self.logger)
         else:
-            print_log(
-                f'Overall fps: {fps_list_[0]:.1f} batch/s, '
-                f'times per batch: {1000 / fps_list_[0]:.1f} ms/batch, '
-                f'batch size: {self.batch_size}, num_workers: '
-                f'{self.num_workers}', self.logger)
+            if fps_list_[0] <= 0:
+                print_log(
+                    'Overall fps: 0.0 batch/s (no measured iterations; '
+                    'try reducing --num-warmup or increasing --max-iter)',
+                    self.logger)
+            else:
+                print_log(
+                    f'Overall fps: {fps_list_[0]:.1f} batch/s, '
+                    f'times per batch: {1000 / fps_list_[0]:.1f} ms/batch, '
+                    f'batch size: {self.batch_size}, num_workers: '
+                    f'{self.num_workers}', self.logger)
 
         print_process_memory(self._process, self.logger)
 
@@ -450,6 +482,8 @@ class DatasetBenchmark(BaseBenchmark):
         pure_inf_time = 0
         fps = 0
 
+        measured_iters = 0
+
         total_index = list(range(len(self.dataset)))
         np.random.shuffle(total_index)
 
@@ -484,8 +518,10 @@ class DatasetBenchmark(BaseBenchmark):
 
             if i >= self.num_warmup:
                 pure_inf_time += elapsed
+                measured_iters += 1
                 if (i + 1) % self.log_interval == 0:
-                    fps = (i + 1 - self.num_warmup) / pure_inf_time
+                    fps = ((i + 1 - self.num_warmup) / pure_inf_time
+                           if pure_inf_time > 0 else 0)
 
                     print_log(
                         f'Done img [{i + 1:<3}/{self.max_iter}], '
@@ -493,10 +529,14 @@ class DatasetBenchmark(BaseBenchmark):
                         f'times per img: {1000 / fps:.1f} ms/img', self.logger)
 
             if (i + 1) == self.max_iter:
-                fps = (i + 1 - self.num_warmup) / pure_inf_time
+                fps = ((i + 1 - self.num_warmup) / pure_inf_time
+                       if pure_inf_time > 0 else 0)
                 break
 
             start_time = time.perf_counter()
+
+        if fps <= 0 and measured_iters > 0 and pure_inf_time > 0:
+            fps = measured_iters / pure_inf_time
 
         return {'fps': fps}
 
