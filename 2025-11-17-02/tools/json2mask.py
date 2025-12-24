@@ -40,8 +40,8 @@ def process_json_folder(input_dir, output_dir, image_shape=(512, 512), line_thic
 
 
 if __name__ == "__main__":
-    images_json_folder = "/data/code2025/Q1/2025-04-10-01/datasets/img"  # 🔁 修改为你的输入路径
-    input_json_folder = "/data/code2025/Q1/2025-04-10-01/datasets/json"  # 🔁 修改为你的输入路径
-    output_mask_folder = "/data/code2025/Q1/2025-04-10-01/datasets/gt"  # 🔁 修改为你的输出路径
+    images_json_folder = "/data/code2025/Q1/2025-04-10-01/datasets/img"  
+    input_json_folder = "/data/code2025/Q1/2025-04-10-01/datasets/json"  
+    output_mask_folder = "/data/code2025/Q1/2025-04-10-01/datasets/gt"
     os.makedirs(output_mask_folder, exist_ok=True)
     process_json_folder(input_json_folder, output_mask_folder)

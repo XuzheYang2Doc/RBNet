@@ -3,7 +3,7 @@ import random
 
 
 
-dataset_name = "/data/code2025/Q1/2025-04-10-01/datasets/dataset"
+dataset_name = "dataset"
 file_path = f"{dataset_name}/images"
 train_path = f"{dataset_name}/train/images"
 test_path = f"{dataset_name}/test/images"
