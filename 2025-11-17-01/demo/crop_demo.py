@@ -44,7 +44,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         '--device',
         type=str,
-        default='cuda:3',
+        default='cuda',
         help='Computation device, e.g. cuda:0 or cpu')
     parser.add_argument(
         '--score-thr',
