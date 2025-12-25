@@ -5,6 +5,7 @@
 work_dirs/
 data/
 datasets/
+!*/configs/_base_/datasets
 **/mmdet.egg-info/
 **/mmsegmentation.egg-info/
 __pycache__/
