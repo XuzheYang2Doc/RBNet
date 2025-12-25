@@ -57,13 +57,28 @@ val_dataloader = dict(
         type=dataset_type,
         data_root=data_root,
         data_prefix=dict(
+            img_path='val/images1024',
+            seg_map_path='val/labels1024'),
+        pipeline=test_pipeline,
+        test_mode=True,
+    )
+)
+
+test_dataloader = dict(
+    batch_size=1,
+    num_workers=2,
+    persistent_workers=True,
+    sampler=dict(type='DefaultSampler', shuffle=False),
+    dataset=dict(
+        type=dataset_type,
+        data_root=data_root,
+        data_prefix=dict(
             img_path='test/images1024',
             seg_map_path='test/labels1024'),
         pipeline=test_pipeline,
         test_mode=True,
     )
 )
-test_dataloader = val_dataloader
 
 # Evaluators (match old metrics: mIoU + mDice + mFscore)
 val_evaluator = dict(type='IoUMetric', iou_metrics=['mIoU', 'mDice', 'mFscore'])

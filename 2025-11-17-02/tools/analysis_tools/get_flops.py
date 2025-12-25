@@ -11,7 +11,6 @@ from mmengine.registry import init_default_scope
 
 from mmseg.models import BaseSegmentor
 from mmseg.registry import MODELS
-from mmseg.structures import SegDataSample
 
 try:
     from mmengine.analysis import get_model_complexity_info
@@ -28,8 +27,14 @@ def parse_args():
         '--shape',
         type=int,
         nargs='+',
-        default=[2048, 1024],
+        default=[1024, 1024],
         help='input image size')
+    parser.add_argument(
+        '--device',
+        default='auto',
+        choices=['auto', 'cpu', 'cuda'],
+        help='Device used for FLOPs computation. "auto" uses cuda when '
+        'available; use "cpu" to avoid GPU OOM on Jetson.')
     parser.add_argument(
         '--cfg-options',
         nargs='+',
@@ -64,30 +69,37 @@ def inference(args: argparse.Namespace, logger: MMLogger) -> dict:
         input_shape = (3, ) + tuple(args.shape)
     else:
         raise ValueError('invalid input shape')
+
+    if args.device == 'cuda':
+        if not torch.cuda.is_available():
+            raise RuntimeError('CUDA is not available, but --device cuda was set.')
+        device = torch.device('cuda')
+    elif args.device == 'cpu':
+        device = torch.device('cpu')
+    else:
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     result = {}
 
     model: BaseSegmentor = MODELS.build(cfg.model)
     if hasattr(model, 'auxiliary_head'):
         model.auxiliary_head = None
-    if torch.cuda.is_available():
-        model.cuda()
+    model = model.to(device)
     model = revert_sync_batchnorm(model)
     result['ori_shape'] = input_shape[-2:]
     result['pad_shape'] = input_shape[-2:]
-    data_batch = {
-        'inputs': [torch.rand(input_shape)],
-        'data_samples': [SegDataSample(metainfo=result)]
-    }
-    data = model.data_preprocessor(data_batch)
     model.eval()
     if cfg.model.decode_head.type in ['MaskFormerHead', 'Mask2FormerHead']:
         # TODO: Support MaskFormer and Mask2Former
         raise NotImplementedError('MaskFormer and Mask2Former are not '
                                   'supported yet.')
+    # NOTE:
+    # - mmengine>=0.10 does not allow setting both "input_shape" and "inputs".
+    # - TorchScript trace used by mmengine does not accept SegDataSample inputs.
+    # So we compute complexity with a dummy tensor only (default mode='tensor').
+    dummy_img = torch.rand((1, ) + input_shape, device=device)
     outputs = get_model_complexity_info(
         model,
-        input_shape,
-        inputs=data['inputs'],
+        inputs=(dummy_img, ),
         show_table=False,
         show_arch=False)
     result['flops'] = _format_size(outputs['flops'])

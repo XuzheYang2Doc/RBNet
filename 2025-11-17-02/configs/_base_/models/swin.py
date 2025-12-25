@@ -1,41 +1,53 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 # Migrated from mmseg0.x: my_configs/swin.py
 
-model = {'type': 'EncoderDecoder',
- 'backbone': {'type': 'SwinTransformer',
-              'pretrain_img_size': 224,
-              'embed_dims': 96,
-              'patch_size': 4,
-              'window_size': 7,
-              'mlp_ratio': 4,
-              'depths': [2, 2, 6, 2],
-              'num_heads': [3, 6, 12, 24],
-              'strides': (4, 2, 2, 2),
-              'out_indices': (0, 1, 2, 3),
-              'qkv_bias': True,
-              'qk_scale': None,
-              'patch_norm': True,
-              'drop_rate': 0.0,
-              'attn_drop_rate': 0.0,
-              'drop_path_rate': 0.3,
-              'use_abs_pos_embed': False,
-              'act_cfg': {'type': 'GELU'},
-              'norm_cfg': {'type': 'LN', 'eps': 1e-06, 'requires_grad': True}},
- 'decode_head': {'type': 'UPerHead',
-                 'in_channels': [96, 192, 384, 768],
-                 'in_index': [0, 1, 2, 3],
-                 'pool_scales': (1, 2, 3, 6),
-                 'channels': 512,
-                 'dropout_ratio': 0.1,
-                 'num_classes': 2,
-                 'norm_cfg': {'type': 'SyncBN', 'requires_grad': True},
-                 'align_corners': False,
-                 'loss_decode': [{'type': 'CrossEntropyLoss',
-                                  'loss_name': 'loss_ce',
-                                  'use_sigmoid': False,
-                                  'loss_weight': 2.0},
-                                 {'type': 'DiceLoss',
-                                  'loss_name': 'loss_dice',
-                                  'loss_weight': 2.0}]},
- 'train_cfg': {},
- 'test_cfg': {'mode': 'slide', 'crop_size': (512, 512), 'stride': (256, 256)}}
+model = {
+    'type': 'EncoderDecoder',
+    'backbone': {
+        'type': 'SwinTransformer',
+        'pretrain_img_size': 224,
+        'embed_dims': 96,
+        'patch_size': 4,
+        'window_size': 7,
+        'mlp_ratio': 4,
+        'depths': [2, 2, 6, 2],
+        'num_heads': [3, 6, 12, 24],
+        'strides': (4, 2, 2, 2),
+        'out_indices': (0, 1, 2, 3),
+        'qkv_bias': True,
+        'qk_scale': None,
+        'patch_norm': True,
+        'drop_rate': 0.0,
+        'attn_drop_rate': 0.0,
+        'drop_path_rate': 0.3,
+        'use_abs_pos_embed': False,
+        'act_cfg': {'type': 'GELU'},
+        'norm_cfg': {'type': 'LN', 'eps': 1e-06, 'requires_grad': True}
+    },
+    'decode_head': {
+        'type': 'UPerHead',
+        'in_channels': [96, 192, 384, 768],
+        'in_index': [0, 1, 2, 3],
+        'pool_scales': (1, 2, 3, 6),
+        'channels': 512,
+        'dropout_ratio': 0.1,
+        'num_classes': 2,
+        'norm_cfg': {'type': 'SyncBN', 'requires_grad': True},
+        'align_corners': False,
+        'loss_decode': [
+            {
+                'type': 'CrossEntropyLoss',
+                'loss_name': 'loss_ce',
+                'use_sigmoid': False,
+                'loss_weight': 2.0
+            },
+            {
+                'type': 'DiceLoss',
+                'loss_name': 'loss_dice',
+                'loss_weight': 2.0
+            }
+        ]
+    },
+    'train_cfg': {},
+    'test_cfg': {'mode': 'slide', 'crop_size': (512, 512), 'stride': (256, 256)}
+}
