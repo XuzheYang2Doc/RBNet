@@ -18,3 +18,4 @@ __pycache__/
 .pre-commit-config.yaml
 .readthedocs.yml
 2025-11-17-02_mmseg0/
+2025-11-17-02/configs/other
