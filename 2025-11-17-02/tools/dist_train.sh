@@ -1,17 +1,8 @@
-#!/usr/bin/env bash
-
 CONFIG=$1
 GPUS=$2
 NNODES=${NNODES:-1}
 NODE_RANK=${NODE_RANK:-0}
-function random_range(){
-    local beg=$1
-    local end=$2
-    echo $((RANDOM % ($end - $beg) + $beg))
-}
-rnd=$(random_range 10000 30000)
-PORT=${PORT:-$rnd}
-echo "$0"
+PORT=${PORT:-29500}
 MASTER_ADDR=${MASTER_ADDR:-"127.0.0.1"}
 
 PYTHONPATH="$(dirname $0)/..":$PYTHONPATH \
@@ -23,5 +14,4 @@ python -m torch.distributed.launch \
     --master_port=$PORT \
     $(dirname "$0")/train.py \
     $CONFIG \
-    --seed 0 \
     --launcher pytorch ${@:3}

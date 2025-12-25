@@ -1,1 +1,0 @@
-CUDA_VISIBLE_DEVICES=1,2 nohup ./tools/dist_train.sh ./my_config/deeplabv3plus_all.py 2 >> exp.log &

@@ -11,3 +11,10 @@ __pycache__/
 .idea/
 .vscode/
 .DS_Store
+.circleci/
+.dev_scripts/
+.github/
+.owners.yml
+.pre-commit-config.yaml
+.readthedocs.yml
+2025-11-17-02_mmseg0/

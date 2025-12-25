@@ -9,14 +9,14 @@ import torch.nn.functional as F
 import torch.utils.checkpoint as cp
 from mmcv.cnn import build_norm_layer
 from mmcv.cnn.bricks.transformer import FFN, build_dropout
-from mmcv.cnn.utils.weight_init import (constant_init, trunc_normal_,
+from mmengine.logging import print_log
+from mmengine.model import BaseModule, ModuleList
+from mmengine.model.weight_init import (constant_init, trunc_normal_,
                                         trunc_normal_init)
-from mmcv.runner import (BaseModule, CheckpointLoader, ModuleList,
-                         load_state_dict)
-from mmcv.utils import to_2tuple
+from mmengine.runner import CheckpointLoader
+from mmengine.utils import to_2tuple
 
-from ...utils import get_root_logger
-from ..builder import BACKBONES
+from mmseg.registry import MODELS
 from ..utils.embed import PatchEmbed, PatchMerging
 
 
@@ -326,7 +326,7 @@ class SwinBlock(BaseModule):
                  with_cp=False,
                  init_cfg=None):
 
-        super(SwinBlock, self).__init__(init_cfg=init_cfg)
+        super().__init__(init_cfg=init_cfg)
 
         self.with_cp = with_cp
 
@@ -462,26 +462,7 @@ class SwinBlockSequence(BaseModule):
             return x, hw_shape, x, hw_shape
 
 
-class SE_Block(nn.Module):
-    def __init__(self, channel, ratio=16):
-        super(SE_Block, self).__init__()
-        self.avg_pool = nn.AdaptiveAvgPool2d(1)
-        self.fc = nn.Sequential(
-            nn.Linear(channel, channel // ratio, bias=False),
-            nn.ReLU(inplace=True),
-            nn.Linear(channel // ratio, channel, bias=False),
-            nn.Sigmoid()
-        )
-
-    def forward(self, x):
-        y = self.avg_pool(x)
-        b, c, _, _ = x.size()
-        y = self.avg_pool(x).view(b, c)
-        y = self.fc(y).view(b, c, 1, 1)
-        return x * y
-
-
-@BACKBONES.register_module()
+@MODELS.register_module()
 class SwinTransformer(BaseModule):
     """Swin Transformer backbone.
 
@@ -536,7 +517,6 @@ class SwinTransformer(BaseModule):
 
     def __init__(self,
                  pretrain_img_size=224,
-                 se_block=[False, False, False, False],
                  in_channels=3,
                  embed_dims=96,
                  patch_size=4,
@@ -581,7 +561,7 @@ class SwinTransformer(BaseModule):
         else:
             raise TypeError('pretrained must be a str or None')
 
-        super(SwinTransformer, self).__init__(init_cfg=init_cfg)
+        super().__init__(init_cfg=init_cfg)
 
         num_layers = len(depths)
         self.out_indices = out_indices
@@ -644,13 +624,6 @@ class SwinTransformer(BaseModule):
                 with_cp=with_cp,
                 init_cfg=None)
             self.stages.append(stage)
-            self.se_block = se_block
-
-            self.se_block0 = SE_Block(96) if self.se_block[0] else None
-            self.se_block1 = SE_Block(192) if self.se_block[1] else None
-            self.se_block2 = SE_Block(384) if self.se_block[2] else None
-            self.se_block3 = SE_Block(768) if self.se_block[3] else None
-
             if downsample:
                 in_channels = downsample.out_channels
 
@@ -663,7 +636,7 @@ class SwinTransformer(BaseModule):
 
     def train(self, mode=True):
         """Convert the model into training mode while keep layers freezed."""
-        super(SwinTransformer, self).train(mode)
+        super().train(mode)
         self._freeze_stages()
 
     def _freeze_stages(self):
@@ -689,11 +662,10 @@ class SwinTransformer(BaseModule):
                 param.requires_grad = False
 
     def init_weights(self):
-        logger = get_root_logger()
         if self.init_cfg is None:
-            logger.warn(f'No pre-trained weights for '
-                        f'{self.__class__.__name__}, '
-                        f'training start from scratch')
+            print_log(f'No pre-trained weights for '
+                      f'{self.__class__.__name__}, '
+                      f'training start from scratch')
             if self.use_abs_pos_embed:
                 trunc_normal_(self.absolute_pos_embed, std=0.02)
             for m in self.modules():
@@ -707,7 +679,7 @@ class SwinTransformer(BaseModule):
                                                   f'`init_cfg` in ' \
                                                   f'{self.__class__.__name__} '
             ckpt = CheckpointLoader.load_checkpoint(
-                self.init_cfg['checkpoint'], logger=logger, map_location='cpu')
+                self.init_cfg['checkpoint'], logger=None, map_location='cpu')
             if 'state_dict' in ckpt:
                 _state_dict = ckpt['state_dict']
             elif 'model' in ckpt:
@@ -732,7 +704,7 @@ class SwinTransformer(BaseModule):
                 N1, L, C1 = absolute_pos_embed.size()
                 N2, C2, H, W = self.absolute_pos_embed.size()
                 if N1 != N2 or C1 != C2 or L != H * W:
-                    logger.warning('Error in loading absolute_pos_embed, pass')
+                    print_log('Error in loading absolute_pos_embed, pass')
                 else:
                     state_dict['absolute_pos_embed'] = absolute_pos_embed.view(
                         N2, H, W, C2).permute(0, 3, 1, 2).contiguous()
@@ -744,23 +716,25 @@ class SwinTransformer(BaseModule):
             ]
             for table_key in relative_position_bias_table_keys:
                 table_pretrained = state_dict[table_key]
-                table_current = self.state_dict()[table_key]
-                L1, nH1 = table_pretrained.size()
-                L2, nH2 = table_current.size()
-                if nH1 != nH2:
-                    logger.warning(f'Error in loading {table_key}, pass')
-                elif L1 != L2:
-                    S1 = int(L1**0.5)
-                    S2 = int(L2**0.5)
-                    table_pretrained_resized = F.interpolate(
-                        table_pretrained.permute(1, 0).reshape(1, nH1, S1, S1),
-                        size=(S2, S2),
-                        mode='bicubic')
-                    state_dict[table_key] = table_pretrained_resized.view(
-                        nH2, L2).permute(1, 0).contiguous()
+                if table_key in self.state_dict():
+                    table_current = self.state_dict()[table_key]
+                    L1, nH1 = table_pretrained.size()
+                    L2, nH2 = table_current.size()
+                    if nH1 != nH2:
+                        print_log(f'Error in loading {table_key}, pass')
+                    elif L1 != L2:
+                        S1 = int(L1**0.5)
+                        S2 = int(L2**0.5)
+                        table_pretrained_resized = F.interpolate(
+                            table_pretrained.permute(1, 0).reshape(
+                                1, nH1, S1, S1),
+                            size=(S2, S2),
+                            mode='bicubic')
+                        state_dict[table_key] = table_pretrained_resized.view(
+                            nH2, L2).permute(1, 0).contiguous()
 
             # load state_dict
-            load_state_dict(self, state_dict, strict=False, logger=logger)
+            self.load_state_dict(state_dict, strict=False)
 
     def forward(self, x):
         x, hw_shape = self.patch_embed(x)
@@ -779,10 +753,5 @@ class SwinTransformer(BaseModule):
                                self.num_features[i]).permute(0, 3, 1,
                                                              2).contiguous()
                 outs.append(out)
-
-        outs[0] = self.se_block0(outs[0]) if self.se_block[0] else outs[0]
-        outs[1] = self.se_block1(outs[1]) if self.se_block[1] else outs[1]
-        outs[2] = self.se_block2(outs[2]) if self.se_block[2] else outs[2]
-        outs[3] = self.se_block3(outs[3]) if self.se_block[3] else outs[3]
 
         return outs
