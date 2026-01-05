@@ -11,7 +11,7 @@ from mmseg.utils import get_palette
 
 def parse_args():
     parser = ArgumentParser(description='Segmentation inference with area calculation')
-    parser.add_argument('--config', default='deeplabv3plus', help='Config file name without extension')
+    parser.add_argument('--config', default='deeplabv3plus_all', help='Config file name without extension')
     parser.add_argument('--work_dirs', default='work_dirs', help='Directory that stores checkpoints')
     parser.add_argument('--checkpoint', default='iter_10000.pth', help='Checkpoint file name')
     parser.add_argument('--device', default='cuda:0', help='Device used for inference')
