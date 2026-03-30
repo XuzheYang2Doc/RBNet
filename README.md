@@ -22,5 +22,16 @@
   <sup>*</sup> Corresponding author
 </div><hr>
 
+<figure align="center">
+  <img src="assets/1.png" alt="Schematic overview of the proposed technical workflow" width="100%">
+  <figcaption>
+    <strong>Figure 1.</strong> Schematic overview of the proposed technical workflow.
+    (A) Sampling sites for dataset images.
+    (B) RBNet cascade framework.
+    (C) Web application architecture.
+    (D) Handheld device architecture.
+  </figcaption>
+</figure>
 
+<hr>
 The source code of **RBNet** is currently being organized and will be made publicly available upon completion.
