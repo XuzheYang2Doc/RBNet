@@ -34,4 +34,4 @@
 </figure>
 
 <hr>
-The source code of **RBNet** is currently being organized and will be made publicly available upon completion.
+The source code of <strong>RBNet</strong> is currently being organized and will be made publicly available upon completion.
