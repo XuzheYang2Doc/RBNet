@@ -35,3 +35,5 @@
 
 <hr>
 The source code of <strong>RBNet</strong> is currently being organized and will be made publicly available upon completion.
+
+The file analyze_annotations.py is used for visual analysis of annotations
