@@ -34,6 +34,7 @@
 </figure>
 
 <hr>
+To enhance the algorithm’s usability in real-world applications, we are currently optimizing the code related to post-processing and user experience, and plan to open-source the project once all optimizations are complete. Whether you are a peer reviewer evaluating the algorithmic aspects of a paper or a researcher engaged in rice blast resistance breeding or crop pathology, we are happy to share our current work with you—even though it is not yet perfect. Please feel free to contact the corresponding author at any time; we look forward to discussing and collaborating with you on related research.
 The source code of <strong>RBNet</strong> is currently being organized and will be made publicly available upon completion.
 
 The file analyze_annotations.py is used for visual analysis of annotations
