@@ -116,7 +116,7 @@ def main():
     
     root = Path.cwd()
     
-    stage1_dir = root / "2025-11-17-01"
+    stage1_dir = root / "configs" / "instance"
     passed = stage1_dir.exists() and stage1_dir.is_dir()
     all_passed &= check_item(
         "Stage-1 project directory",
@@ -124,7 +124,7 @@ def main():
         f"{stage1_dir}"
     )
     
-    stage2_dir = root / "2025-11-17-02"
+    stage2_dir = root / "configs" / "semantic"
     passed = stage2_dir.exists() and stage2_dir.is_dir()
     all_passed &= check_item(
         "Stage-2 project directory",
@@ -135,7 +135,7 @@ def main():
     # Check model configs
     print("\n6. Model Configurations")
     
-    stage1_config = root / "2025-11-17-01" / "my_config" / "mask2former.py"
+    stage1_config = root / "configs" / "instance" / "mask2former_leaf.py"
     passed = stage1_config.exists() and stage1_config.is_file()
     check_item(
         "Stage-1 config",
@@ -145,7 +145,7 @@ def main():
     if not passed:
         print(f"    Expected: {stage1_config}")
     
-    stage2_config = root / "2025-11-17-02" / "configs" / "my_model_configs" / "deeplabv3plus_all.py"
+    stage2_config = root / "configs" / "semantic" / "deeplabv3plus_all.py"
     passed = stage2_config.exists() and stage2_config.is_file()
     check_item(
         "Stage-2 config",
@@ -158,7 +158,7 @@ def main():
     # Check model checkpoints
     print("\n7. Model Checkpoints")
     
-    stage1_ckpt = root / "2025-11-17-01" / "work_dirs" / "mask2former" / "iter_5000.pth"
+    stage1_ckpt = root / "checkpoints" / "mask2former_leaf.pth"
     passed = stage1_ckpt.exists() and stage1_ckpt.is_file()
     check_item(
         "Stage-1 checkpoint",
@@ -166,7 +166,7 @@ def main():
         f"{stage1_ckpt}" if passed else "Not found (use --stage1_checkpoint to specify)"
     )
     
-    stage2_ckpt = root / "2025-11-17-02" / "work_dirs" / "deeplabv3plus_all" / "iter_10000.pth"
+    stage2_ckpt = root / "checkpoints" / "rbnet_deeplabv3plus_all.pth"
     passed = stage2_ckpt.exists() and stage2_ckpt.is_file()
     check_item(
         "Stage-2 checkpoint",

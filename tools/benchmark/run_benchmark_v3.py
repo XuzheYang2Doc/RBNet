@@ -28,7 +28,7 @@ def run_stage1_batch(image_paths: List[str], config: str, checkpoint: str,
                      score_thr: float, device: str, temp_dir: Path,
                      warmup: int = 0) -> List[Dict]:
     """Run stage-1 on all images in one session."""
-    sys.path.insert(0, str(_SCRIPT_DIR / "2025-11-17-01"))
+    sys.path.insert(0, str(_SCRIPT_DIR / "."))
     
     import mmcv
     from mmengine import Config
@@ -162,7 +162,7 @@ def run_stage1_batch(image_paths: List[str], config: str, checkpoint: str,
 def run_stage2_batch(stage1_results: List[Dict], config: str, checkpoint: str,
                      device: str, output_dir: Path, warmup_done: bool = True) -> List[Dict]:
     """Run stage-2 on all ROIs from stage-1 results."""
-    sys.path.insert(0, str(_SCRIPT_DIR / "2025-11-17-02"))
+    sys.path.insert(0, str(_SCRIPT_DIR / "."))
     
     import mmcv
     from mmengine import Config
@@ -254,13 +254,13 @@ def main():
     parser = argparse.ArgumentParser(description='Benchmark two-stage pipeline (batch mode)')
     parser.add_argument('--images', type=str, required=True, help='Image directory or file list')
     parser.add_argument('--stage1-config', type=str, 
-                       default='2025-11-17-01/my_config/mask2former.py')
+                       default='configs/instance/mask2former_leaf.py')
     parser.add_argument('--stage1-checkpoint', type=str,
-                       default='2025-11-17-01/work_dirs/mask2former/iter_5000.pth')
+                       default='checkpoints/mask2former_leaf.pth')
     parser.add_argument('--stage2-config', type=str,
-                       default='2025-11-17-02/configs/my_model_configs/deeplabv3plus_all.py')
+                       default='configs/semantic/deeplabv3plus_all.py')
     parser.add_argument('--stage2-checkpoint', type=str,
-                       default='2025-11-17-02/work_dirs/deeplabv3plus_all/iter_10000.pth')
+                       default='checkpoints/rbnet_deeplabv3plus_all.pth')
     parser.add_argument('--score-thr', type=float, default=0.3, help='Stage-1 score threshold')
     parser.add_argument('--num-images', type=int, default=500, help='Number of images to process')
     parser.add_argument('--warmup', type=int, default=10, help='Warmup iterations')

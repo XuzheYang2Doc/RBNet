@@ -33,12 +33,12 @@ echo "========================================="
 echo ""
 
 # Stage-1 config
-STAGE1_CONFIG="2025-11-17-01/my_config/mask2former.py"
-STAGE1_CKPT="2025-11-17-01/work_dirs/mask2former/iter_5000.pth"
+STAGE1_CONFIG="configs/instance/mask2former_leaf.py"
+STAGE1_CKPT="checkpoints/mask2former_leaf.pth"
 
 # Stage-2 config
-STAGE2_CONFIG="2025-11-17-02/configs/my_model_configs/deeplabv3plus_all.py"
-STAGE2_CKPT="2025-11-17-02/work_dirs/deeplabv3plus_all/iter_10000.pth"
+STAGE2_CONFIG="configs/semantic/deeplabv3plus_all.py"
+STAGE2_CKPT="checkpoints/rbnet_deeplabv3plus_all.pth"
 
 # Check if checkpoints exist
 if [ ! -f "$STAGE1_CKPT" ]; then

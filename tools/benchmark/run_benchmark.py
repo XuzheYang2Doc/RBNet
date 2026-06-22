@@ -50,16 +50,16 @@ def main() -> int:
                         choices=['single-leaf', 'continuous'],
                         help='Legacy mode flag kept for shell compatibility')
     parser.add_argument('--stage1-config', '--stage1_config', dest='stage1_config',
-                        type=str, default='2025-11-17-01/my_config/mask2former.py')
+                        type=str, default='configs/instance/mask2former_leaf.py')
     parser.add_argument('--stage1-checkpoint', '--stage1_checkpoint',
                         dest='stage1_checkpoint', type=str,
-                        default='2025-11-17-01/work_dirs/mask2former/iter_5000.pth')
+                        default='checkpoints/mask2former_leaf.pth')
     parser.add_argument('--stage2-config', '--stage2_config', dest='stage2_config',
                         type=str,
-                        default='2025-11-17-02/configs/my_model_configs/deeplabv3plus_all.py')
+                        default='configs/semantic/deeplabv3plus_all.py')
     parser.add_argument('--stage2-checkpoint', '--stage2_checkpoint',
                         dest='stage2_checkpoint', type=str,
-                        default='2025-11-17-02/work_dirs/deeplabv3plus_all/iter_10000.pth')
+                        default='checkpoints/rbnet_deeplabv3plus_all.pth')
     parser.add_argument('--score-thr', '--score_thr', dest='score_thr',
                         type=float, default=0.3)
     parser.add_argument('--num-images', '--num_images', dest='num_images',

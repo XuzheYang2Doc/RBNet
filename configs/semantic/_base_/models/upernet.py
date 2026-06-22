@@ -1,0 +1,43 @@
+# Copyright (c) OpenMMLab. All rights reserved.
+
+model = {
+    'type': 'EncoderDecoder',
+    'backbone': {
+        'type': 'ResNetV1c',
+        'depth': 50,
+        'num_stages': 4,
+        'out_indices': (0, 1, 2, 3),
+        'dilations': (1, 1, 1, 1),
+        'strides': (1, 2, 2, 2),
+        'norm_cfg': {'type': 'SyncBN', 'requires_grad': True},
+        'norm_eval': False,
+        'style': 'pytorch',
+        'contract_dilation': True
+    },
+    'decode_head': {
+        'type': 'UPerHead',
+        'in_channels': [256, 512, 1024, 2048],
+        'in_index': [0, 1, 2, 3],
+        'pool_scales': (1, 2, 3, 6),
+        'channels': 512,
+        'dropout_ratio': 0.1,
+        'num_classes': 2,
+        'norm_cfg': {'type': 'SyncBN', 'requires_grad': True},
+        'align_corners': False,
+        'loss_decode': [
+            {
+                'type': 'CrossEntropyLoss',
+                'loss_name': 'loss_ce',
+                'use_sigmoid': False,
+                'loss_weight': 2.0
+            },
+            {
+                'type': 'DiceLoss',
+                'loss_name': 'loss_dice',
+                'loss_weight': 2.0
+            }
+        ]
+    },
+    'train_cfg': {},
+    'test_cfg': {'mode': 'slide', 'crop_size': (512, 512), 'stride': (256, 256)}
+}
