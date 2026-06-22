@@ -26,3 +26,12 @@ model = dict(data_preprocessor=data_preprocessor)
 
 # Keep this from old configs; safe even if you run single-GPU.
 model_wrapper_cfg = dict(type='MMDistributedDataParallel', find_unused_parameters=True)
+
+custom_hooks = [
+    dict(
+        type='DzymFeatureMapHook',
+        interval=200,
+        num_samples=2,
+        layers=['decode_head'],
+        mode='iter')
+]
